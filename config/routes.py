@@ -1,11 +1,20 @@
-from .init import app, db, bcrypt
+from .init import app, db, bcrypt, login_manager
 from .models import *
 from .authform import *
-from flask import render_template, redirect, session, url_for, request
-from flask_login import current_user, login_user, login_required, logout_user
+from flask import flash, render_template, redirect, session, url_for, request
+from flask_login import current_user, login_user, login_required, logout_user, UserMixin
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 #Authenticating user
-@app.route('/register',methods=['GET','POST'])
+@app.route('/register')
+def signup():
+    return render_template('register.html')
+
+@app.route('/register', methods=['POST'])
 def register_page():
     if current_user.is_authenticated:
         redirect(url_for('home'))
@@ -16,15 +25,20 @@ def register_page():
         user = User(
             name = form.name.data,
             email = form.email.data,
+            balance = form.balance.data,
             password_hash = password)
         db.session.add(user)
         db.session.commit()
         return redirect(url_for('login'))
-    return render_template('register.html', form = form, title = 'Register')
+    return render_template('register.html', title = 'Register')
 
-@app.route('/', methods=['GET'])
-@app.route("/login", methods=['GET','POST'])
+
+@app.route('/login')
 def login():
+    return render_template('login.html')
+
+@app.route("/login", methods=['POST'])
+def login_page():
     if current_user.is_authenticated:
         redirect(url_for('home'))
     form = LoginForm()
@@ -33,28 +47,32 @@ def login():
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user)
             return redirect(url_for('home'))
-    return render_template('login.html', form = form, title = 'Login')
+        else:
+                flash("Invalid Username or password!", "danger")
+        
+    return render_template('login.html', title = 'Login')
 
 @app.route('/logout')
-@login_required
 def logout():
     logout_user()
     return redirect(url_for('login'))
 
 
 # Routes
+@app.route('/')
 @app.route('/home', methods=['GET'])
 def home():
-    products = Item.query.order_by(Item.title.desc())
-    return render_template('home.html', title = 'Shope', products = products)
+    products = Item.query.order_by(Item.name.desc())
+    return render_template('home.html', products = products)
 
 # add item
 @app.route('/add', methods=['GET', 'POST'])
-@login_required
 def add():
     if request.method == 'POST':
         name = request.form['name']
-        item = Item(name = name)
+        price = request.form['price']
+        description = request.form['description']
+        item = Item(name = name, price = price, description = description, buyer_id = 1)
         db.session.add(item)
         db.session.commit()
         return redirect(url_for('add'))
@@ -65,16 +83,15 @@ def add():
 @app.route('/cart', methods=['POST','GET'])
 def cart():
     total = 0
-    cartItems = CartItem.query.filter_by(user_id = current_user.get_id())
+    cartItems = CartItem.query.filter_by(user_id = 1)
     if cartItems:
         for i in cartItems:
             item_info = Item.query.filter_by(id = i.id).first()
             total += item_info.price * i.quantity  
-    return render_template('cart.html', title = 'Cart', total = total)
+    return render_template('cart.html', cartItems = cartItems, total = total)
 
-@app.route('/add_to_cart', methods = ['GET', 'POST'])
-@login_required
-def add():
+@app.route('/add_to_cart', methods = ['POST'])
+def add_to_cart():
     if request.method == 'POST':
         item_id = request.form['id']
         quantity = request.form['quantity']

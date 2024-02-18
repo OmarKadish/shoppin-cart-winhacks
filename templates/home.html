@@ -1,0 +1,36 @@
+{% extends 'layout.html' %} {% block content %}
+<h1>Shopping List Application</h1>
+<p>Welcome home! This is the homepage of a simple shopping list application.</p>
+<div class="container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Item title</th>
+                <th>Price</th>
+                <th>description</th>
+                <th>Add to Cart</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in products %}
+            <tr>
+                <td>{{ item.name }}</td>
+                <td>${{ item.price }}</td>
+                <td>{{ item.description }}</td>
+                <td>
+                    <form method="POST" action="/add_to_cart">
+                        <div class="product-quantity">
+                            <div class="pro-qty">
+                                <input type="text" value="1" name = "quantity">
+                                <input type="hidden" value="{{item.id}}" name = "quantity">
+                            </div>
+                        </div>
+                        <input type="submit" class="primary-btn pc-btn" value="Add to cart">
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

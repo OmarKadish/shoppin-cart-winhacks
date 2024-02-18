@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Transaction History</title>
+</head>
+
+<body>
+    <h2>Transaction History</h2>
+    <ul>
+        {% for purchase in purchases %}
+        <li>{{ purchase.purchase_date }}: {{ purchase.item_name }} - {{ purchase.quantity }} @ ${{ purchase.price }}</li>
+        {% endfor %}
+    </ul>
+</body>
+
+</html>

@@ -13,12 +13,13 @@ with open('config.json') as f:
     config = json.load(f)
 
 # creating an instance of Flask as our app
-app = Flask(__name__)
+app = Flask(__name__, template_folder='../templates')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///store.db'
 app.config['SECRET_KEY'] = config['secret_key']
 bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
-login_manager.login_view = 'login'
+login_manager.init_app(app)
+#login_manager.login_view = 'login'
 
 # creating database connection variable
 db = SQLAlchemy()
@@ -40,6 +41,6 @@ if len(sys.argv) > 1:
 # or just run without an additional arg to run in debug
 else:
     print('<< DEBUG >>')
-    app.run(debug=True)
+    #app.run(debug = True)
 
 from config import routes
