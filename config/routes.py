@@ -10,11 +10,11 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 #Authenticating user
-@app.route('/register')
+@app.get('/register')
 def signup():
     return render_template('register.html')
 
-@app.route('/register', methods=['POST'])
+@app.post('/register')
 def register_page():
     if current_user.is_authenticated:
         redirect(url_for('home'))
