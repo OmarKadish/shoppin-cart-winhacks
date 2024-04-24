@@ -1,5 +1,6 @@
 {
     "python.analysis.extraPaths": [
         "./config"
-    ]
+    ],
+    "python.analysis.typeCheckingMode": "basic"
 }
